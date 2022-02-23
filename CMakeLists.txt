@@ -69,4 +69,4 @@ add_executable(mit6s081
         user/user.h
         user/usertests.c
         user/wc.c
-        user/zombie.c)
+        user/zombie.c user/pingpong.c)
