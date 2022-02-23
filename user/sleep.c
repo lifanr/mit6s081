@@ -6,7 +6,7 @@ int
 main(int argc, char *argv[])
 {
     if(argc < 2){
-        fprintf(2, "Usage:time outs\n");
+        fprintf(2, "Usage: time outs\n");
         exit(1);
     }
 
