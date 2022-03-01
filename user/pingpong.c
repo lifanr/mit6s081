@@ -5,8 +5,8 @@
 int main(int argc, char *argv[]){
     int parent_fd[2];
     int child_fd[2];
-    parent_fd= pipe(parent_fd[2]);
-    child_fd= pipe(child_fd[2]);
+    pipe(parent_fd);
+    pipe(child_fd);
     if(parent_fd== -1){
         printf("pipe1 error");
     }
