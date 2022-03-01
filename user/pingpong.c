@@ -1,36 +1,59 @@
+作者：lemonman
+        链接：https://zhuanlan.zhihu.com/p/272199762
+来源：知乎
+        著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main(int argc, char *argv[]){
-    int parent_fd[2];
-    int child_fd[2];
-    pipe(parent_fd);
-    pipe(child_fd);
-    if(parent_fd== -1){
-        printf("pipe1 error");
-    }
-    if(child_fd== -1){
-        printf("pipe2 error");
-    }
-    int pid = fork();
-    char buf[64];
-    if(pid == 0){ //child
-        read(parent_fd[0], buf, 4);
-        printf("%d: received %s\n", getpid(), buf);
-        write(child_fd[1], "ping", strlen('ping'));
-    }else{
-        // parent
-        write(parent_fd[1], "pang", strlen("pang"));
-        read(child_fd[0], buf, 4);
-        printf("%d: received %s\n", getpid(), buf);
-    }
-    close(parent_fd[0]);
-    close(parent_fd[1]);
-    close(child_fd[0]);
-    close(child_fd[1]);
-    exit(0);
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDDER_FILENO 2
 
+#define READEND 0
+#define WRITEEND 1
+
+typedef int pid_t;
+
+int main(void)
+{
+    // build two pipe
+    int pfd[2];
+    int cfd[2];
+
+    char buf[10];
+    pid_t pid;
+
+    pipe(pfd);
+    pipe(cfd);
+
+    if ((pid = fork()) < 0)
+    {
+        fprintf(STDDER_FILENO, "fork error\n");
+        exit(1);
+    }
+    else if (pid == 0) // child process
+    {
+        close(pfd[WRITEEND]);
+        close(cfd[READEND]);
+        read(pfd[READEND], buf, 4);
+        printf("%d: received %s\n", getpid(), buf);
+        write(cfd[WRITEEND], "pong", 4);
+        close(cfd[WRITEEND]);
+    }
+    else // parent process
+    {
+        close(pfd[READEND]);
+        close(cfd[WRITEEND]);
+        write(pfd[WRITEEND], "ping", 4);
+        close(pfd[WRITEEND]);
+        read(cfd[READEND], buf, 4);
+        printf("%d: received %s\n", getpid(), buf);
+    }
+
+    exit(0);
+}
 //
 // Created by rikka on 2022/2/23.
 //
